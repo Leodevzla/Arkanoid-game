@@ -1,0 +1,78 @@
+
+    body {
+        background-color: #463d3d;
+    }
+    canvas {
+        border: 4px solid #fff;
+        border-bottom: transparent;
+        background: url('/arkanoid-game/img/bkg.png') repeat;
+        margin: 0 auto;
+        display: block;
+    }
+    #title {
+       padding: 0px 320px;
+      
+    }
+   .icons {
+        padding-left: 300px;
+        margin: 10px 0;
+        display: inline-block;
+        display: flex;
+        justify-content: space-between;
+        width: 448px;
+        align-items: center;
+
+    }
+    .fa-html5 {
+        color: orange;
+    }
+    .fa-css3-alt {
+        color: rgb(25, 132, 203);
+    }
+    .fa-js {
+        color: rgb(243, 247, 22);
+    }
+
+    /* CSS */
+.button-73 {
+  appearance: none;
+  background-color: #FFFFFF;
+  border-radius: 40em;
+  border-style: none;
+  box-shadow: #adfbff 0 -12px 6px inset;
+  box-sizing: border-box;
+  color: #0e0000;
+  cursor: pointer;
+  display: inline-block;
+  font-family: -apple-system,sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -.20px;
+  margin: 0;
+  outline: none;
+  padding: 0.5rem 0.5rem;
+  quotes: auto;
+  text-align: center;
+  text-decoration: none;
+  transition: all .15s;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.button-73:hover {
+  background-color: #40E0D0;
+  box-shadow: #40E0D0 0 -6px 8px inset;
+  transform: scale(1.125);
+}
+
+.button-73:active {
+  transform: scale(1.025);
+}
+
+@media (min-width: 768px) {
+  .button-73 {
+    font-size: 1rem;
+    padding: .75rem 2rem;
+  }
+}

@@ -1,0 +1,268 @@
+<title>Arkanoid en JavaScript</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="style.css">
+<body>
+    
+
+<header>
+    <img  id="title" src="./img/arkanoid.png" alt="Titulo del proyecto" width="400px">
+    <div class="icons">
+        <button class="button-73" role="button"><i class="fa-brands fa-html5"></i>Html5</button>    
+        <button class="button-73" role="button"> <i class="fa-brands fa-css3-alt"></i>Css</button>
+        <button class="button-73" role="button"><i class="fa-brands fa-js"></i>JavaScript</button>
+    </div>
+    
+</header>
+<canvas></canvas>
+
+<img hidden id="sprite" src="/arkanoid-game/img/sprite.png" alt="Sprite Arkanoid">
+<img hidden id= "bricks" src="/arkanoid-game/img/bricks.png" alt="Sprite Bricks Arkanoid">
+
+</body>
+<script>
+    const canvas = document.querySelector('canvas')
+    const ctx = canvas.getContext('2d')
+
+    const $sprite = document.querySelector('#sprite')
+    const $bricks = document.querySelector('#bricks')
+
+    canvas.width = 448
+    canvas.height = 400
+
+    /*VARIABLES DE LA PELOTA*/
+    const ballRadius = 4;
+
+    // posicion de la pelota
+    let x = canvas.width /2
+    let y = canvas.height -30
+
+    // velocidad de la pelota
+    let dx = 3
+    let dy = -3
+    /*VARIABLES DE LA PALETA*/
+    const paddleHeight = 10;
+    const paddleWidth = 50;
+
+    let paddleX = (canvas.width - paddleWidth) / 2
+    let paddleY = canvas.height - paddleHeight - 10
+
+    let rightPressed = false
+    let leftPressed = false
+
+    /* VARIABLE DE LOS LADRILLOS */
+    const brickRowCount = 6;
+    const brickColumnCount = 13;
+    const brickWidth = 32;
+    const brickHeight = 16;
+    const brickPadding = 0;
+    const brickOffsetTop = 80;
+    const brickOffsetLeft = 16;
+    const bricks = [];
+
+    const BRICK_STATUS = {
+        ACTIVE: 1,
+       DESTROYED: 0
+    }
+
+    for (let c = 0; c < brickColumnCount; c++) {
+        bricks[c] = [] // iniciliamos con un array vacio
+        for (let r = 0; r < brickRowCount; r++) {
+            //calculando la posicion del ladrilla en la pantalla
+            const brickX = c * (brickWidth + brickPadding) +
+            brickOffsetLeft
+            const brickY = r * (brickHeight + brickPadding) +
+            brickOffsetTop
+            // asignar un color a cada ladrillo
+            const random = Math.floor(Math.random() * 8)
+
+            bricks[c][r] = { 
+                x: brickX,
+                y: brickY,
+                status: BRICK_STATUS.ACTIVE,
+                color: random
+            }
+    
+        }
+    }
+
+
+    const PADDLE_SENSITIVITY = 7
+
+
+    function drawBall() { 
+        ctx.beginPath()
+        ctx.arc(x, y, ballRadius, 0, Math.PI * 2)
+        ctx.fillStyle = '#fff'
+        ctx.fill()
+        ctx.closePath()
+        
+    }
+    function drawBricks() {
+        for (let c = 0; c < brickColumnCount; c++) {
+        for (let r = 0; r < brickRowCount; r++) {
+            const currentBrick = bricks[c] [r]
+            if (currentBrick.status === BRICK_STATUS.DESTROYED)
+            continue;
+
+            // ctx.fillStyle = 'yellow'
+            // ctx.rect(
+            //     currentBrick.x,
+            //     currentBrick.y,
+            //     brickWidth,
+            //     brickHeight
+            // )
+            // ctx.strokeStyle = '#000'
+            // ctx.stroke()
+            // ctx.fill()
+
+            const clipX = currentBrick.color * 32
+
+            ctx.drawImage(
+                $bricks,
+                clipX,
+                0,
+                32,
+                16,
+                currentBrick.x,
+                currentBrick.y,
+                brickWidth,
+                brickHeight
+            )
+            
+        }
+     }
+    }
+
+    function drawPaddle() { 
+        // ctx.fillStyle = '#09f'
+        // ctx.fillRect(
+        //     paddleX,
+        //     paddleY,
+        //     paddleWidth,
+        //     paddleHeight
+        // )
+
+        ctx.drawImage(
+         $sprite,
+         29,
+         174,
+         paddleWidth,
+         paddleHeight,
+         paddleX,
+         paddleY,
+         paddleWidth,
+         paddleHeight
+        )
+    }
+
+    function collisionDetection() { 
+        for (let c = 0; c < brickColumnCount; c++) {
+        for (let r = 0; r < brickRowCount; r++) {
+            const currentBrick = bricks[c][r]
+            if(currentBrick.status === BRICK_STATUS.DESTROYED) continue;
+            
+            const  isBallSameXAsBrick =
+             x > currentBrick.x &&
+             x < currentBrick.x + brickWidth
+
+             const  isBallSameYAsBrick =
+             y > currentBrick.y &&
+             y < currentBrick.y + brickHeight
+
+            if (isBallSameXAsBrick && isBallSameYAsBrick) {
+                dy = -dy
+                currentBrick.status = BRICK_STATUS.DESTROYED
+                }
+            }
+            
+        }
+    }
+        
+    
+    function ballMovement() { 
+        // rebotar las pelotas en los laterales
+        if (
+            x + dx > canvas.width - ballRadius || // pared derecha
+            x + dx < ballRadius // pared izquierda
+        ) {
+            dx = -dx
+        }
+
+        // rebotar las pelotas de arriba
+        if (y + dy < ballRadius) {
+            dy = -dy
+        }
+
+        // la pelota toca la pala
+        const  isBallSameXAsPaddle =
+            x > paddleX &&
+            x < paddleX + paddleWidth
+
+        const isBallTouchingPaddle =
+        y + dy > paddleY 
+
+
+        if (isBallSameXAsPaddle && isBallTouchingPaddle) {
+            dy = -dy //cambiamos la direccion de la pelota
+        } else if ( // la pelota toca  el suelo 
+        y + dy > canvas.height - ballRadius) {
+            console.log('Game Over')
+            document.location.reload()
+        }
+
+        x += dx
+        y +=dy
+    }
+    function paddleMovement() { 
+        if (rightPressed &&  paddleX < canvas.width - paddleWidth) {
+            paddleX += PADDLE_SENSITIVITY
+        } else if (leftPressed && paddleX > 0) {
+            paddleX -= PADDLE_SENSITIVITY
+        }
+    }
+
+    function cleanCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+    }
+       function initEvents () {
+       document.addEventListener('keydown', keyDownHandler) 
+       document.addEventListener('keyup', keyUpHandler) 
+
+       function keyDownHandler (event) {
+        const { key } = event
+        if (key === 'Right' || key === 'ArrowRight') {
+            rightPressed = true
+        } else if (key === 'Left' || key === 'ArrowLeft') {
+        leftPressed = true
+        }
+    }
+
+    function keyUpHandler (event) {
+        const { key } = event
+        if (key === 'Right' || key === 'ArrowRight') {
+            rightPressed = false
+        } else if (key === 'Left' || key === 'ArrowLeft') {
+        leftPressed = false
+       }
+    }
+}
+
+
+
+    function draw () {
+        cleanCanvas()
+        // Elementos
+        drawBall()
+        drawPaddle()
+        drawBricks()
+
+        // colisiones y movimientos
+        collisionDetection()
+        ballMovement()
+        paddleMovement()
+
+        window.requestAnimationFrame(draw)
+    }
+    draw ()
+    initEvents()
+</script>
